@@ -77,7 +77,7 @@ router.post('/login', function (req, res, next) {
 			if(data.password==req.body.password){
 				//console.log("Done Login");
 				req.session.userId = data.u_id;
-				console.log(req.session.userId);
+				//console.log(req.session.userId);
 				res.send({"Success":"Success!"});
 				
 			}else{
@@ -153,11 +153,13 @@ router.post('/veh_rf_register',function(req,res,next){
   var rfid = req.body.rfid;
   var vid ;
   var rid ;
+console.log("heloo"+req.session.userId);
 	VehicleModel.findOne({},function(err,data){
 						var vid ;
 						if (data) {
 							vid = data.v_id + 1;
-							console.log("id");
+							req.session.v_id = data.v_id + 1;
+							console.log("sesvm"+req.session.v_id);
 						}else{
 							vid=1;
 							console.log("c1");
@@ -178,12 +180,36 @@ router.post('/veh_rf_register',function(req,res,next){
 
 					}).sort({_id: -1}).limit(1);
 
+	RfidModel.findOne({},function(err,data){
+							var rid ;
+							if (data) {
+								rid = data.r_id + 1;
+								req.session.r_id = rid;
+								console.log(req.session.r_id);
+							}else{
+								rid=1;
+								console.log("c1");
+							}
+
+							var newrfid = new RfidModel({
+							    r_id: rid,
+							    rfid_no: rfid,
+							    f_u_id:req.session.userId 
+							  });
 
 
-var vid =  VehicleModel.find().toArray();
+							newrfid.save(function(err, Rfid){
+								if(err)
+									console.log(err);
+								else
+									console.log('Success');
+							});
 
-console.log("vid");
-console.log(vid);
+						}).sort({_id: -1}).limit(1);
+
+console.log("vsdf"+ req.session.v_id);
+console.log("jhbx"+ req.session.r_id);
+
 /*
   var newvehicle = new VehicleModel({
     v_id: vid,
