@@ -6,7 +6,6 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
-
 mongoose.connect('mongodb://localhost/vehiclerfid_db', {useNewUrlParser: true  });
 
 var db = mongoose.connection;
@@ -51,6 +50,8 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.send(err.message);
 });
+
+
 
 
 // listen on port 3000

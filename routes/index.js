@@ -1,8 +1,29 @@
 var express = require('express');
 var router = express.Router();
+var session = require('express-session');
 var Usermodel = require('../models/userModel');
+var VehicleRfidModel = require('../models/vehiclerfidModel');
+var RfidModel = require('../models/rfidModel');
+var VehicleModel = require('../models/vehicleModel');
 var vehno = require('../models/vehno');
 var rfidno = require('../models/rfidno');
+var app = express();
+var session = require('express-session');
+var mongoose = require('mongoose');
+var MongoStore = require('connect-mongo')(session);
+mongoose.connect('mongodb://localhost/vehiclerfid_db', {useNewUrlParser: true  });
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+});
+app.use(session({
+  secret: 'work hard',
+  resave: true,
+  saveUninitialized: false,
+  store: new MongoStore({
+    mongooseConnection: db
+  })
+}));
 
 /****get request**/
 router.get('/', function (req, res, next) {
@@ -56,7 +77,7 @@ router.post('/login', function (req, res, next) {
 			if(data.password==req.body.password){
 				//console.log("Done Login");
 				req.session.userId = data.u_id;
-				//console.log(req.session.userId);
+				console.log(req.session.userId);
 				res.send({"Success":"Success!"});
 				
 			}else{
@@ -75,12 +96,11 @@ router.post('/register', function(req, res, next) {
 
 	console.log(userInfo);
 
-	if(!userInfo.email || !userInfo.name || !userInfo.password || !userInfo.passwordConf){
+	if(!userInfo.email || !userInfo.name || !userInfo.mobileno || !userInfo.password || !userInfo.passwordConf){
 		res.send();
 		console.log("1not");
 	} else { 
 		if (userInfo.password == userInfo.passwordConf) {
-			console.log("1");
 			Usermodel.findOne({email:userInfo.email},function(err,data){
 				if(!data){
 					var c;
@@ -98,6 +118,7 @@ router.post('/register', function(req, res, next) {
 						var newUser = new Usermodel({
 							u_id:c,
 							name: userInfo.username,
+							mobileno: userInfo.mobileno,
 							email: userInfo.email,
 							password: userInfo.password,
 							usertype:1
@@ -121,6 +142,77 @@ router.post('/register', function(req, res, next) {
 			res.send({"Success":"password is not matched"});
 		}
 	}
+});
+
+
+router.post('/veh_rf_register',function(req,res,next){
+  //console.log(req.body);
+  //console.log(req.session.userId);
+
+  var vehicle_no = req.body.vehicleno;
+  var rfid = req.body.rfid;
+  var vid ;
+  var rid ;
+	VehicleModel.findOne({},function(err,data){
+						var vid ;
+						if (data) {
+							vid = data.v_id + 1;
+							console.log("id");
+						}else{
+							vid=1;
+							console.log("c1");
+						}
+
+						var newvehicle = new VehicleModel({
+						    v_id: vid,
+						    vehicle_no: vehicle_no,
+						    f_u_id:req.session.userId 
+						  });
+
+						newvehicle.save(function(err, Vehicle){
+							if(err)
+								console.log(err);
+							else
+								console.log('Success');
+						});
+
+					}).sort({_id: -1}).limit(1);
+
+
+
+var vid =  VehicleModel.find().toArray();
+
+console.log("vid");
+console.log(vid);
+/*
+  var newvehicle = new VehicleModel({
+    v_id: vid,
+    vehicle_no: vehicle_rfid_no.vehicleno,
+    f_u_id:req.session.userId 
+  });
+
+  var newrfid = new RfidModel({
+    r_id: rid,
+    rfid_no: vehicle_rfid_no.rfid,
+    f_u_id:req.session.userId 
+  });
+
+  var newvehiclerfid = new VehicleRfidModel({
+    vr_id: vrid,
+    f_v_id: f_vid,
+    f_r_id:f_rid, 
+    f_u_id:f_uid
+  });
+
+
+  newvno.save(function(err, data){
+                                
+              if(err)
+                console.log(err);
+              else
+                console.log('Success');
+            });return res.render('vregister.ejs');*/
+
 });
 
 router.post('/rfregister',function(req,res,next){

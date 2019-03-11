@@ -7,6 +7,7 @@ var Schema = mongoose.Schema;
 	name: String,
 	email: String,
 	password: String,
+	mobileno: String,
 	usertype:Number
 }),
 Usertbl = mongoose.model('usertbl', userSchema);
