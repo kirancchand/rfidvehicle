@@ -12,6 +12,7 @@
   "dependencies": {
     "connect": "^3.6.6",
     "connect-mongo": "^2.0.3",
+    "datatables-query": "^0.2.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",

@@ -153,16 +153,20 @@ router.post('/veh_rf_register',function(req,res,next){
   var rfid = req.body.rfid;
   var vid ;
   var rid ;
+  var vr_id ;
 console.log("heloo"+req.session.userId);
-	VehicleModel.findOne({},function(err,data){
-						var vid ;
-						if (data) {
-							vid = data.v_id + 1;
-							req.session.v_id = data.v_id + 1;
-							console.log("sesvm"+req.session.v_id);
+
+//vehicle table registration
+	VehicleModel.findOne({},function(err,vdata){
+						
+						if (vdata) {
+							vid = vdata.v_id + 1;
+							req.session.v_id = vid;
+							console.log("vehicletbl"+req.session.v_id);
 						}else{
 							vid=1;
-							console.log("c1");
+							req.session.v_id=vid;
+							console.log("vehicletbl first entry"+req.session.v_id);
 						}
 
 						var newvehicle = new VehicleModel({
@@ -175,20 +179,22 @@ console.log("heloo"+req.session.userId);
 							if(err)
 								console.log(err);
 							else
-								console.log('Success');
-						});
+							{
 
-					}).sort({_id: -1}).limit(1);
+								console.log('Success registration in vehicletbl');
+//RFID  table registration
+	RfidModel.findOne({},function(err,rdata){
 
-	RfidModel.findOne({},function(err,data){
-							var rid ;
-							if (data) {
-								rid = data.r_id + 1;
+							
+							if (rdata) {
+								rid = rdata.r_id + 1;
 								req.session.r_id = rid;
-								console.log(req.session.r_id);
+								console.log("rfidtbl"+rid);
+
 							}else{
 								rid=1;
-								console.log("c1");
+								req.session.r_id = rid;
+								console.log("rfidtbl first entry"+req.session.r_id);
 							}
 
 							var newrfid = new RfidModel({
@@ -202,44 +208,136 @@ console.log("heloo"+req.session.userId);
 								if(err)
 									console.log(err);
 								else
-									console.log('Success');
+								{
+									console.log('Success in rfid table');
+
+//Vehicle RFID map table
+
+	VehicleRfidModel.findOne({},function(err,vrdata){
+							
+							if (vrdata) {
+								vr_id = vrdata.vr_id + 1;
+								req.session.vr_id = vr_id;
+								console.log("vehiclerfidtbl"+req.session.vr_id);
+							}else{
+								vr_id=1;
+								req.session.vr_id = vr_id;
+								console.log("vehiclerfidtbl first entry"+req.session.vr_id);
+							}
+
+							var newvehiclerfid = new VehicleRfidModel({
+							    vr_id: vr_id,
+							    f_v_id: req.session.v_id,
+							    f_r_id: req.session.r_id,
+							    f_u_id: req.session.userId 
+							  });
+
+
+							newvehiclerfid.save(function(err, Rfid){
+								if(err)
+									console.log(err);
+								else
+								{
+									console.log('Success in vehicle rfid tbl');
+									res.send({"Success":"true"});
+
+
+
+								}
+							});
+
+						}).sort({_id: -1}).limit(1);
+//Vehicle RFID map table
+
+								}
 							});
 
 						}).sort({_id: -1}).limit(1);
 
-console.log("vsdf"+ req.session.v_id);
-console.log("jhbx"+ req.session.r_id);
-
-/*
-  var newvehicle = new VehicleModel({
-    v_id: vid,
-    vehicle_no: vehicle_rfid_no.vehicleno,
-    f_u_id:req.session.userId 
-  });
-
-  var newrfid = new RfidModel({
-    r_id: rid,
-    rfid_no: vehicle_rfid_no.rfid,
-    f_u_id:req.session.userId 
-  });
-
-  var newvehiclerfid = new VehicleRfidModel({
-    vr_id: vrid,
-    f_v_id: f_vid,
-    f_r_id:f_rid, 
-    f_u_id:f_uid
-  });
+//RFID  table registration
 
 
-  newvno.save(function(err, data){
-                                
-              if(err)
-                console.log(err);
-              else
-                console.log('Success');
-            });return res.render('vregister.ejs');*/
+								
+							}
+						});
+
+					}).sort({_id: -1}).limit(1);
+
+//vehicle table registration
 
 });
+
+
+
+
+router.post('/viewvehiclerfiddetails', function (req, res) {
+
+	var searchStr = req.body.search.value;
+	if(req.body.search.value)
+    {
+            var regex = new RegExp(req.body.search.value, "i")
+            searchStr = { $or: [{'vr_id':regex },{'f_v_id': regex},{'f_r_id': regex }] };
+    }
+    else
+    {
+         searchStr={};
+    }
+    var recordsTotal = 0;
+    var recordsFiltered=0;
+
+    VehicleRfidModel.count({}, function(err, c) {
+        recordsTotal=c;
+        console.log(c);
+        VehicleRfidModel.count(searchStr, function(err, c) {
+            recordsFiltered=c;
+            console.log(c);
+            console.log(req.body.start);
+            console.log(req.body.length);
+          
+                VehicleRfidModel.find(searchStr, 'vr_id f_v_id f_r_id f_u_id',{'limit': Number(req.body.length) }, function (err, results) {
+                    if (err) {
+                        console.log('error while getting results'+err);
+                        return;
+                    }
+            
+                    var data = JSON.stringify({
+                        "draw": req.body.draw,
+                        "recordsFiltered": recordsFiltered,
+                        "recordsTotal": recordsTotal,
+                        "data": results
+                    });
+                    res.send(data);
+                });
+        
+          });
+
+
+   });
+
+
+
+});
+
+
+router.get('/viewvehiclerfiddetails', function (req, res) {
+
+	var searchStr = req.body.search.value;
+	if(req.body.search.value)
+    {
+            var regex = new RegExp(req.body.search.value, "i")
+            searchStr = { $or: [{'_id':regex },{'city': regex},{'state': regex }] };
+    }
+    else
+    {
+         searchStr={};
+    }
+    console.log(searchStr);
+
+});
+
+
+
+
 
 router.post('/rfregister',function(req,res,next){
 	console.log(req.body);
