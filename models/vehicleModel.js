@@ -10,3 +10,5 @@ var Schema = mongoose.Schema;
 Vehicletbl = mongoose.model('vehicletbl', vehicleSchema);
 
 module.exports = Vehicletbl;
+
+

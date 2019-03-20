@@ -3,6 +3,7 @@ var router = express.Router();
 var session = require('express-session');
 var Usermodel = require('../models/userModel');
 var VehicleRfidModel = require('../models/vehiclerfidModel');
+var VehicleRfidSingleModel = require('../models/vehiclerfidsingleModel');
 var RfidModel = require('../models/rfidModel');
 var VehicleModel = require('../models/vehicleModel');
 var vehno = require('../models/vehno');
@@ -67,6 +68,55 @@ router.get('/admin_log_details', function (req, res, next) {
 	return res.render('adminlogdetails');
 });
 /****post request***/
+
+router.get('/checking', function (req, res, next) {
+
+
+
+
+
+		VehicleRfidModel.aggregate([
+		{
+			$lookup:
+			{
+				from:"vehicletbls",
+				localField:"f_v_id",
+				foreignField:"v_id",
+				as:"vehicletbl"
+			}
+		},
+		{
+			$lookup:
+			{
+				from:"rfidtbls",
+				localField:"f_r_id",
+				foreignField:"r_id",
+				as:"rfidtbl"
+			}
+		},
+		{
+			$lookup:
+			{
+				from:"usertbls",
+				localField:"f_u_id",
+				foreignField:"u_id",
+				as:"usertbl"
+			}
+		}
+
+	],function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        console.log(result);
+    });
+
+
+
+
+
+});
 
 
 router.post('/login', function (req, res, next) {
@@ -143,6 +193,55 @@ router.post('/register', function(req, res, next) {
 		}
 	}
 });
+
+
+router.post('/veh_rf_insingleregister',function(req,res,next){
+  //console.log(req.body);
+  //console.log(req.session.userId);
+
+  var vehicle_no = req.body.vehicleno;
+  var rfid_no = req.body.rfid;
+  var vrs_id ;
+
+//vehicle table registration
+	VehicleRfidSingleModel.findOne({},function(err,vrsdata){
+						
+						if (vrsdata) {
+							vrs_id = vrsdata.vrs_id + 1;
+							req.session.vrs_id = vrs_id;
+							console.log("vehiclerfidsingletbl"+req.session.vrs_id);
+						}else{
+							vrs_id=1;
+							req.session.vrs_id=vrs_id;
+							console.log("vehiclerfidsingletbl first entry"+req.session.vrs_id);
+						}
+
+						var newvehiclerfidsingle = new VehicleRfidSingleModel({
+						    vrs_id: vrs_id,
+						    vehicle_no: vehicle_no,
+						    rfid_no: rfid_no,
+						    f_u_id:req.session.userId 
+						  });
+
+						newvehiclerfidsingle.save(function(err, Vehicle){
+							if(err)
+								console.log(err);
+							else
+							{
+
+								console.log('Success registration in vehiclerfidsingletbl');
+								res.send({"Success":"true"});
+
+								
+							}
+						});
+
+					}).sort({_id: -1}).limit(1);
+
+//vehicle table registration
+
+});
+
 
 
 router.post('/veh_rf_register',function(req,res,next){
@@ -275,26 +374,28 @@ router.post('/viewvehiclerfiddetails', function (req, res) {
 	var searchStr = req.body.search.value;
 	if(req.body.search.value)
     {
-            var regex = new RegExp(req.body.search.value, "i")
-            searchStr = { $or: [{'vr_id':regex },{'f_v_id': regex},{'f_r_id': regex }] };
+            var regex = new RegExp(req.body.search.value, "i");
+            
+            searchStr = { $or: [{'vehicle_no':regex },{'rfid_no': regex}] };
     }
     else
     {
          searchStr={};
     }
+  
     var recordsTotal = 0;
     var recordsFiltered=0;
-
-    VehicleRfidModel.count({}, function(err, c) {
+//VehicleRfidSingleModel  =  VehicleRfidModel
+    VehicleRfidSingleModel.countDocuments({}, function(err, c) {
         recordsTotal=c;
-        console.log(c);
-        VehicleRfidModel.count(searchStr, function(err, c) {
+        //console.log(c);
+        VehicleRfidSingleModel.countDocuments(searchStr, function(err, c) {
             recordsFiltered=c;
-            console.log(c);
-            console.log(req.body.start);
-            console.log(req.body.length);
-          
-                VehicleRfidModel.find(searchStr, 'vr_id f_v_id f_r_id f_u_id',{'limit': Number(req.body.length) }, function (err, results) {
+            //console.log(c);
+            //console.log(req.body.start);
+            //console.log(req.body.length);
+          //vrs_id vehicle_no rfid_no f_u_id  ==  vr_id f_v_id f_r_id f_u_id
+                VehicleRfidSingleModel.find(searchStr, 'vrs_id vehicle_no rfid_no',{'skip':Number(req.body.start),'limit': Number(req.body.length) }, function (err, results) {
                     if (err) {
                         console.log('error while getting results'+err);
                         return;
@@ -318,7 +419,7 @@ router.post('/viewvehiclerfiddetails', function (req, res) {
 
 });
 
-
+/*
 router.get('/viewvehiclerfiddetails', function (req, res) {
 
 	var searchStr = req.body.search.value;
@@ -333,7 +434,7 @@ router.get('/viewvehiclerfiddetails', function (req, res) {
     }
     console.log(searchStr);
 
-});
+});*/
 
 
 

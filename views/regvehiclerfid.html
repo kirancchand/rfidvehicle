@@ -124,43 +124,11 @@
                   <th>id</th>
                   <th>vehicle no</th>
                   <th>rfid</th>
-                  <th>Action</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>Internet
-                    Explorer 4.0
-                  </td>
-                  <td>Win 95+</td>
-                  <td> btn</td>
-                </tr>
-                           <tr>
-                  <td>1</td>
-                  <td>Internet
-                    Explorer 4.0
-                  </td>
-                  <td>Win 95+</td>
-                  <td> btn</td>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>Internet
-                    Explorer 4.0
-                  </td>
-                  <td>Win 95+</td>
-                  <td> btn</td>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>Internet
-                    Explorer 4.0
-                  </td>
-                  <td>Win 95+</td>
-                  <td> btn</td>
-                </tr>
-                </tfoot>
+                
+                </tbody>
               </table>
             </div>
             <!-- /.box-body -->
@@ -195,18 +163,18 @@
 <!-- ./wrapper -->
 <script type="text/javascript">
 
-  //var table;
+  var table;
         $(document).ready(function(){
 
             //$("#example1").DataTable();
 
-        $('#example1').DataTable({ 
+   table=$('#example1').DataTable({ 
                 
                 "paging": true,
                 "pageLength": 10,
                 "processing": true, //Feature control the processing indicator.
                 "serverSide": true, //Feature control DataTables' server-side processing mode.
-                "order": [], //Initial no order.
+                //"order": [], //Initial no order.
          
                 // Load data for the table's content from an Ajax source
                 "ajax": {
@@ -215,15 +183,18 @@
                 },
                 'columns':
                 [
-                { 'data': 'vr_id', "defaultContent": "", 'name': 'vr_id' },
+                { 'data': 'vrs_id', "defaultContent": "", 'name': 'vrs_id' },
+                { 'data': 'vehicle_no', "defaultContent": "", 'name': 'vehicle_no' },
+                { 'data': 'rfid_no', "defaultContent": "", 'name': 'rfid_no' },
+                /*{ 'data': 'vr_id', "defaultContent": "", 'name': 'vr_id' },
                 { 'data': 'f_v_id', "defaultContent": "", 'name': 'f_v_id' },
                 { 'data': 'f_r_id', "defaultContent": "", 'name': 'f_r_id' },
-                { 'data': 'f_u_id', "defaultContent": "", 'name': 'f_u_id' }
+                { 'data': 'f_u_id', "defaultContent": "", 'name': 'f_u_id' }*/
                 ],
             "columnDefs": [
                 {
                     "searchable": true,
-                    "orderable": false,
+                    "orderable": true,
                     "targets": 0
                 }
                 ]
@@ -244,7 +215,8 @@
                 
                 $.ajax({
                     type: 'POST',
-                    url: '/veh_rf_register',
+                    //url: '/veh_rf_register',
+                    url: '/veh_rf_insingleregister',
                     data: $('#vehiclerfidreg').serialize(),
                     dataType: "json",
                     success: function(response){
@@ -255,6 +227,7 @@
                           {
                             toastr.success('Added Successfully..!!', 'Success Alert', {timeOut: 2000});
                              $('#vehiclerfidreg')[0].reset();
+                             table.ajax.reload(null,false); //reload datatable ajax 
 
                           }
                    
