@@ -74,15 +74,108 @@ router.get('/checking', function (req, res, next) {
 
 
 
+db.collection('vehiclerfidsingletbls').aggregate([
 
-		VehicleRfidModel.aggregate([
-		{
+{
+
+			$lookup:
+			{
+				from:"usertbls",
+				localField:"f_u_id",
+				foreignField:"u_id",
+				as:"usertbls"
+			}
+		
+  },
+  {
+      $match: { "usertbls.u_id":{ $ne : []}  }
+ }
+
+]).toArray(function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        else
+        {
+        	console.log(result);
+        	res.json(result);
+        }
+    });
+
+/*
+db.collection('vehiclerfidtbls').aggregate([
+
+{
+
 			$lookup:
 			{
 				from:"vehicletbls",
 				localField:"f_v_id",
 				foreignField:"v_id",
-				as:"vehicletbl"
+				as:"vehicletbls",
+
+			}
+  },
+ {
+      $match: { "vehicletbls.vehicle_no":{ $ne : []}  }
+ }
+]).toArray(function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        else
+        {
+        	console.log(result);
+        	res.json(result);
+        }
+    });*/
+//VehicleRfidModel
+/*db.collection('vehiclerfidtbls').aggregate([
+   {
+
+			$lookup:
+			{
+				from:"vehicletbls",
+				localField:"f_v_id",
+				foreignField:"v_id",
+				as:"vehicletbls",
+
+			}
+  },
+   {
+      $match: { "vehicletbls.vehicle_no":{ $ne : []}  }
+   }	
+		
+
+	]).toArray(function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        else
+        {
+        	console.log(result);
+        	res.json(result);
+        }
+    });
+/*
+		db.collection('vehiclerfidtbls').aggregate([
+		{
+			
+			$lookup:
+			{
+				from:"vehicletbls",
+				localField:"vehicletbl.f_v_id",
+				foreignField:"v_id",
+				as:"vehicletbl",
+
+
+
+
+
+
 			}
 		},
 		{
@@ -104,13 +197,17 @@ router.get('/checking', function (req, res, next) {
 			}
 		}
 
-	],function (err, result) {
+	]).toArray(function (err, result) {
         if (err) {
             console.log(err);
             return;
         }
-        console.log(result);
-    });
+        else
+        {
+        	console.log(result);
+        	res.json(result);
+        }
+    });*/
 
 
 
@@ -369,6 +466,8 @@ console.log("heloo"+req.session.userId);
 
 
 
+
+
 router.post('/viewvehiclerfiddetails', function (req, res) {
 
 	var searchStr = req.body.search.value;
@@ -418,6 +517,11 @@ router.post('/viewvehiclerfiddetails', function (req, res) {
 
 
 });
+
+
+
+
+
 
 /*
 router.get('/viewvehiclerfiddetails', function (req, res) {
@@ -536,5 +640,11 @@ router.post('/forgetpass', function (req, res, next) {
 	});
 	
 });
+
+
+//db.bankaccountstbl.insert({ba_id:1,name:"aa",account_no:012346,account_balance:500})
+//useraccountstbl ua_id f_u_id balance
+//activitytbls a_id device_no rfid_no timeofentry dateofentry
+//vehicledepttbls vd_id vehicle_no vehicle_type tax_paid insurance_paid
 
 module.exports = router;

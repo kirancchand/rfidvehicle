@@ -114,7 +114,7 @@
           <div class="box">
             <div class="box-header">
               <h3 class="box-title">Data Table With Full Features</h3>
-              <a href="/viewvehiclerfiddetails">click</a>
+              <a href="/checking">click</a>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -140,6 +140,46 @@
       <!-- /.row -->
     </section>
     <!-- /.content -->
+
+
+
+
+
+         <!-- Main content -->
+ <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Data Table With Full Features</h3>
+              <a href="/checking">click</a>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                  <th>id</th>
+                  <th>vehicle no</th>
+                  <th>rfid</th>
+                  <th>action</th>
+                </tr>
+                </thead>
+                <tbody id="withoutdatatable">
+         
+                </tbody>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+
+
   </div>
   <!-- /.content-wrapper -->
   <!-- /.content-wrapper -->
@@ -165,6 +205,43 @@
 
   var table;
         $(document).ready(function(){
+
+
+
+
+
+
+          $.ajax({
+                    type: 'GET',
+                    url: '/checking',
+                    dataType: "json",
+                    success: function(response){
+                        
+                  
+                        for (var i=0; i<response.length; i++) {
+                          var j=i+1;
+                         //console.log(response[i].usertbls[0].password);
+                        $('#example2 tbody').append('<tr><td>'+j+'</td><td>'+response[i].vehicle_no+'</td><td>'+response[i].rfid_no+'</td><td>'+response[i].usertbls[0].email+'</td></tr>');
+                        }
+
+/*
+                         $.each(response, function(index) {
+
+
+
+                          console.log(response[index].usertbls[0].password);
+                      });*/
+                          //console.log(response[0].usertbls[0].email);
+                    
+                        },
+                        error: function() {
+                        }
+                  })
+
+
+
+
+
 
             //$("#example1").DataTable();
 
@@ -227,7 +304,8 @@
                           {
                             toastr.success('Added Successfully..!!', 'Success Alert', {timeOut: 2000});
                              $('#vehiclerfidreg')[0].reset();
-                             table.ajax.reload(null,false); //reload datatable ajax 
+                             //table.ajax.reload(null,false); //reload datatable ajax 
+                              location.reload();
 
                           }
                    
@@ -236,6 +314,14 @@
                         }
                     })
             });
+
+
+
+
+
+
+
+
         });
     </script>
 <!-- jQuery 2.2.3 -->
