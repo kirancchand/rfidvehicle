@@ -68,6 +68,107 @@ router.get('/admin_log_details', function (req, res, next) {
 	return res.render('adminlogdetails');
 });
 /****post request***/
+router.get('/vehicledeptdata', function (req, res, next) {
+
+db.collection('vehicledepttbls').aggregate([
+
+
+
+
+]).toArray(function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        else
+        {
+        	console.log(result);
+        	res.json(result);
+        }
+    });
+
+});
+
+
+router.get('/useraccountdata', function (req, res, next) {
+
+db.collection('useraccountstbl').aggregate([
+
+{
+
+			$lookup:
+			{
+				from:"usertbls",
+				localField:"f_u_id",
+				foreignField:"u_id",
+				as:"usertbls"
+			}
+		
+		
+  },
+
+
+]).toArray(function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        else
+        {
+        	console.log(result);
+        	res.json(result);
+        }
+    });
+
+});
+
+
+
+router.get('/logdata', function (req, res, next) {
+
+db.collection('activitytbls').aggregate([
+
+{
+
+			$lookup:
+			{
+				from:"devicetbls",
+				localField:"device_no",
+				foreignField:"device_no",
+				as:"devicetbl"
+			}
+		
+  },
+{
+
+			$lookup:
+			{
+				from:"vehiclerfidsingletbls",
+				localField:"rfid_no",
+				foreignField:"rfid_no",
+				as:"vehiclerfiddata"
+			}	
+
+
+
+},
+
+
+]).toArray(function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        else
+        {
+        	console.log(result);
+        	res.json(result);
+        }
+    });
+
+});
+
+
 
 router.get('/checking', function (req, res, next) {
 
@@ -646,5 +747,6 @@ router.post('/forgetpass', function (req, res, next) {
 //useraccountstbl ua_id f_u_id balance
 //activitytbls a_id device_no rfid_no timeofentry dateofentry
 //vehicledepttbls vd_id vehicle_no vehicle_type tax_paid insurance_paid
+//devicetbls d_id device_no device_location
 
 module.exports = router;
